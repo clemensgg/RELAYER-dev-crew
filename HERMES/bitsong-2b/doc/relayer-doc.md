@@ -13,14 +13,13 @@ This section contains instructions on how to setup the rust relayer "hermes" and
 
 # Relayer Tutorial
 
-To assist operators in setting up relayers, Bitsong provides tutorials for the following IBC relayers:
-
 Hardware specs:
 
 - 16+ vCPUs or Intel or AMD 16 core CPU
 - at least 64GB RAM
 - 4TB+ nVME drives
 
+To assist operators in setting up relayers, Bitsong provides tutorials for the following IBC relayers:
 
 ## Hermes (rust) https://hermes.informal.systems/
 
