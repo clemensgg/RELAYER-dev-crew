@@ -281,7 +281,7 @@ websocket_addr = 'ws://127.0.0.1:7011/websocket'
 rpc_timeout = '10s'
 account_prefix = 'bitsong'
 key_name = 'bitsong'
-address_type = { derivation = 'cosmos' }
+address_type = { derivation = 'bitsong' }
 store_prefix = 'ibc'
 default_gas = 2000000
 max_gas = 4000000
