@@ -17,6 +17,16 @@ To assist operators in setting up relayers, Bitsong provides tutorials for the f
 
 ### Hermes (rust) https://hermes.informal.systems/
 
+Pre-requisites: 
+
+- latest go-version https://golang.org/doc/install
+- Fresh Rust installation: For instructions on how to install Rust on your machine please follow the official Notes about Rust installation at https://www.rust-lang.org/tools/install
+- build-essential, git
+- openssl for rust. The OpenSSL library with its headers is required. Refer to https://docs.rs/openssl/0.10.38/openssl/
+
+```sudo apt install librust-openssl-dev```
+
+
 To successfully relay IBC packets you need to run private full nodes (custom pruning or archive node) on all networks you want to support. Since relaying-success highly depends on latency and disk-IO-rate it is currently recommended to service these full/archive nodes on the same machine as the relayer process. 
 
 Because the relaying process needs to be able to query the chain back in height for at least 2/3 of the unstaking period ("trusting period") it is recommended to use pruning settings that will keep the full chain-state for a longer period of time than the unstaking period:
@@ -95,4 +105,219 @@ cosmoshub-4 seeds: "bf8328b66dceb4987e5cd94430af66045e59899f@public-seed.cosmos.
 cosmoshub-4 persistent-peers: "ee27245d88c632a556cf72cc7f3587380c09b469@45.79.249.253:26656,538ebe0086f0f5e9ca922dae0462cc87e22f0a50@34.122.34.67:26656,d3209b9f88eec64f10555a11ecbf797bb0fa29f4@34.125.169.233:26656,bdc2c3d410ca7731411b7e46a252012323fbbf37@34.83.209.166:26656,585794737e6b318957088e645e17c0669f3b11fc@54.160.123.34:26656,11dfe200894f38e411beca77928e9dd118e66813@94.130.98.157:26656"
 ```
 
-please reference https://github.com/cosmos/chain-registry for a maintained list of peers & seeds.
+*please reference https://github.com/cosmos/chain-registry for a maintained list of peers & seeds.*
+
+To simplify the config process you can use Environment-Variables in the systemd file:
+
+```sudo vim /etc/systemd/system/bitsongd.service```
+
+```
+[Unit]
+Description=Bitsong Daemon
+
+[Service]
+User=relay
+Environment="DAEMON_HOME=/home/relay/.bitsongd"
+Environment="DAEMON_NAME=bitsongd"
+Environment=BITSONGD_P2P_LADDR=tcp://0.0.0.0:7010
+Environment=BITSONGD_RPC_LADDR=tcp://0.0.0.0:7011
+Environment=BITSONGD_GRPC_ADDRESS=127.0.0.1:7012
+Environment=BITSONGD_API_ADDRESS=tcp://127.0.0.1:7013
+Environment=BITSONGD_PPROF_LADDR=localhost:7019
+Environment=BITSONGD_P2P_PERSISTENT_PEERS="a62038142844828483dbf16fa6dd159f6857c81b@173.212.247.98:26656,e9fea0509b1a2d16a10ef9fdea0a4e3edc7ca485@185.144.83.158:26656,8208adac8b09f3e2499dfaef24bb89a2d190a7a3@164.68.109.246:26656,cf031ac1cf44c9c311b5967712899391a434da9a@161.97.97.61:26656,d6b2ae82c38927fa7b7630346bd84772e632983a@157.90.95.104:15631,a5885669c1f7860bfe28071a7ec00cc45b2fcbc3@144.91.85.56:26656,325a5920a614e2375fea90f8a08d8b8d612fdd1e@137.74.18.30:26656,ae2787a337c3599b16410f3ac09d6918da2e5c37@46.101.238.149:26656,9336f75cd99ff6e5cdb6335e8d1a2c91b81d84b9@65.21.0.232:26656,9c6e52e78f112a55146b09110d1d1be47702df27@135.181.211.184:36656"
+Environment=BITSONGD_P2P_SEEDS="ffa27441ca78a5d41a36f6d505b67a145fd54d8a@95.217.156.228:26656,efd52c1e56b460b1f37d73c8d2bd5f860b41d2ba@65.21.62.83:26656"
+Environment=BITSONGD_SNAPSHOT_INTERVAL=1000
+Environment=BITSONGD_P2P_MAX_NUM_INBOUND_PEERS=100
+Environment=BITSONGD_P2P_MAX_NUM_OUTBOUND_PEERS=100
+LimitNOFILE=5000000
+ExecStart=/usr/local/bin/bitsongd start --pruning custom --pruning-keep-recent 400000 --pruning-keep-every=0 --pruning-interval 100 --home --x-crisis-skip-assert-invariants
+Environment=BITSONGD_LOG_LEVEL=info
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### Build & setup Hermes
+
+
+```mkdir -p $HOME/.hermes/bin```
+
+Make the directory where you'll place the binary, clone the hermes source repository and build it using the latest release. Copy to ~/.cargo/bin & /usr/bin (or preferred directory for systemd execution)
+```
+mkdir -p $HOME/hermes/bin
+git clone https://github.com/informalsystems/ibc-rs.git hermes
+cd hermes
+git checkout v0.8.0
+cargo install ibc-relayer-cli --bin hermes --locked
+cp target/release/hermes $HOME/.cargo/bin
+sudo cp target/release/hermes /usr/bin
+```
+
+Make hermes config & keys directory, copy config-template to config directory:
+```
+mkdir -p $HOME/.hermes
+mkdir -p $HOME/.hermes/keys
+cp config.toml $HOME/.hermes
+```
+
+Check hermes version & config dir setup
+```
+hermes version
+INFO ThreadId(01) using default configuration from '/home/relay/.hermes/config.toml'
+hermes 0.8.0
+```
+
+Edit hermes config (use ports according to your port config, set filter=true to filter channels you don't relay)
+```
+# The global section has parameters that apply globally to the relayer operation.
+[global]
+
+# Specify the strategy to be used by the relayer. Default: 'packets'
+# Two options are currently supported:
+#   - 'all': Relay packets and perform channel and connection handshakes.
+#   - 'packets': Relay packets only.
+strategy = 'packets'
+
+# Enable or disable the filtering mechanism. Default: 'false'
+# Valid options are 'true', 'false'.
+# Currently Hermes supports two filters:
+# 1. Packet filtering on a per-chain basis; see the chain-specific
+#   filter specification below in [chains.packet_filter].
+# 2. Filter for all activities based on client state trust threshold; this filter
+#   is parametrized with (numerator = 1, denominator = 3), so that clients with
+#   thresholds different than this will be ignored.
+# If set to 'true', both of the above filters will be enabled.
+filter = true
+
+# Specify the verbosity for the relayer logging output. Default: 'info'
+# Valid options are 'error', 'warn', 'info', 'debug', 'trace'.
+log_level = 'info'
+
+# Parametrize the periodic packet clearing feature.
+# Interval (in number of blocks) at which pending packets
+# should be eagerly cleared. A value of '0' will disable
+# periodic packet clearing. Default: 100
+clear_packets_interval = 25
+
+# Toggle the transaction confirmation mechanism.
+# The tx confirmation mechanism periodically queries the `/tx_search` RPC
+# endpoint to check that previously-submitted transactions
+# (to any chain in this config file) have delivered successfully.
+# Experimental feature. Affects telemetry if set to false.
+# Default: true.
+tx_confirmation = true
+
+
+# The REST section defines parameters for Hermes' built-in RESTful API.
+# https://hermes.informal.systems/rest.html
+[rest]
+
+# Whether or not to enable the REST service. Default: false
+enabled = true
+
+# Specify the IPv4/6 host over which the built-in HTTP server will serve the RESTful
+# API requests. Default: 127.0.0.1
+host = '127.0.0.1'
+
+# Specify the port over which the built-in HTTP server will serve the restful API
+# requests. Default: 3000
+port = 3000
+
+
+# The telemetry section defines parameters for Hermes' built-in telemetry capabilities.
+# https://hermes.informal.systems/telemetry.html
+[telemetry]
+
+# Whether or not to enable the telemetry service. Default: false
+enabled = true
+
+# Specify the IPv4/6 host over which the built-in HTTP server will serve the metrics
+# gathered by the telemetry service. Default: 127.0.0.1
+host = '127.0.0.1'
+
+# Specify the port over which the built-in HTTP server will serve the metrics gathered
+# by the telemetry service. Default: 3001
+port = 3001
+
+[[chains]]
+id = 'osmosis-1'
+rpc_addr = 'http://localhost:7001'
+grpc_addr = 'http://localhost:7002'
+websocket_addr = 'ws://localhost:7001/websocket'
+rpc_timeout = '10s'
+account_prefix = 'osmo'
+key_name = 'osmosis'
+address_type = { derivation = 'osmosis' }
+store_prefix = 'ibc'
+default_gas = 5000000
+max_gas = 15000000
+gas_price = { price = 0.000, denom = 'uosmo' }
+gas_adjustment = 0.1
+max_msg_num = 20
+max_tx_size = 2097152
+clock_drift = '20s'
+max_block_time = '10s'
+trusting_period = '10days'
+memo_prefix = ''
+trust_threshold = { numerator = '1', denominator = '3' }
+[chains.packet_filter]
+policy = 'allow'
+list = [
+  ['transfer', 'channel-73']
+]
+
+[[chains]]
+id = 'bitsong-2b'
+rpc_addr = 'http://127.0.0.1:7011'
+grpc_addr = 'http://127.0.0.1:7012'
+websocket_addr = 'ws://127.0.0.1:7011/websocket'
+rpc_timeout = '10s'
+account_prefix = 'bitsong'
+key_name = 'bitsong'
+address_type = { derivation = 'cosmos' }
+store_prefix = 'ibc'
+default_gas = 2000000
+max_gas = 4000000
+gas_price = { price = 0.026, denom = 'ubtsg' }
+gas_adjustment = 0.1
+max_msg_num = 25
+max_tx_size = 1800000
+clock_drift = '10s'
+max_block_time = '10s'
+trusting_period = '14d'
+memo_prefix = ''
+trust_threshold = { numerator = '1', denominator = '3' }
+[chains.packet_filter]
+policy = 'allow'
+list = [
+ ['transfer', 'channel-0'],
+ ['transfer', 'channel-1']
+ ]
+
+[[chains]]
+id = 'cosmoshub-4'
+rpc_addr = 'http://127.0.0.1:7021'
+grpc_addr = 'http://127.0.0.1:7022'
+websocket_addr = 'ws://127.0.0.1:7021/websocket'
+rpc_timeout = '10s'
+account_prefix = 'cosmos'
+key_name = 'cosmos'
+address_type = { derivation = 'cosmos' }
+store_prefix = 'ibc'
+default_gas = 2000000
+max_gas = 3000000
+gas_price = { price = 0.001, denom = 'uatom' }
+gas_adjustment = 0.1
+max_msg_num = 25
+max_tx_size = 180000
+clock_drift = '10s'
+max_block_time = '10s'
+trusting_period = '14days'
+memo_prefix = ''
+trust_threshold = { numerator = '1', denominator = '3' }
+[chains.packet_filter]
+policy = 'allow'
+list = [
+   ['transfer', 'channel-229']
+ ]
+```
