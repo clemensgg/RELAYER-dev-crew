@@ -379,18 +379,22 @@ It will try & clear any unreceived packets after startup has completed.
 ### Snippets
 
 Query Hermes for unreceived packets & acknowledgements (check if channels are "clear")
-
-```hermes query packet unreceived-packets bitsong-2b transfer channel-0```
-```hermes query packet unreceived-acks bitsong-2b transfer channel-0```
-
-```hermes query packet unreceived-packets osmosis-1 transfer channel-73```
-```hermes query packet unreceived-acks bitsong-1 transfer channel-73```
+```
+hermes query packet unreceived-packets bitsong-2b transfer channel-0
+hermes query packet unreceived-acks bitsong-2b transfer channel-0
+```
+```
+hermes query packet unreceived-packets osmosis-1 transfer channel-73
+hermes query packet unreceived-acks bitsong-1 transfer channel-73
+```
 
 Query Hermes for packet commitments:
-
-```hermes query packet commitments osmosis-1 transfer channel-0```
+```
+hermes query packet commitments osmosis-1 transfer channel-0
+```
 
 Clear unreceived packets manually. *Experimental: you'll need to stop your hermes daemon for it not to get confused with account sequences.*
-
-```hermes tx raw packet-recv osmosis-1 bitsong-2b transfer channel-0```
-```hermes tx raw packet-recv bitsong-2b osmosis-1 transfer channel-73```
+```
+hermes tx raw packet-recv osmosis-1 bitsong-2b transfer channel-0
+hermes tx raw packet-recv bitsong-2b osmosis-1 transfer channel-73
+```
