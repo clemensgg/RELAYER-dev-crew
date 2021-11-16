@@ -1,7 +1,7 @@
 This section contains instructions on how to setup the rust relayer "hermes" and relay IBC packets between bitsong-2b and other IBC-enabled networks.
 
 
-## official Bitsong IBC Channels
+# official Bitsong IBC Channels
 
 | source chain-id  | source channel  | source denom | destination chain-id  | destinaion channel | IBC token-address on destinaion chain |
 | ---------------- | --------------- | ------------ | --------------------- | ------------------ | ------------------------------------------- |
@@ -11,11 +11,18 @@ This section contains instructions on how to setup the rust relayer "hermes" and
 | cosmoshub-4 | channel-229 | uatom | bitsong-2b | channel-1 | IBC/C4CFF46FD6DE35CA4CF4CE031E643C8FDC9BA4B99AE598E9B0ED98FE3A2319F9 |
 
 
-## Relayer Tutorial
+# Relayer Tutorial
 
 To assist operators in setting up relayers, Bitsong provides tutorials for the following IBC relayers:
 
-### Hermes (rust) https://hermes.informal.systems/
+Hardware specs:
+
+- 16+ vCPUs or Intel or AMD 16 core CPU
+- at least 64GB RAM
+- 4TB+ nVME drives
+
+
+## Hermes (rust) https://hermes.informal.systems/
 
 Pre-requisites: 
 
@@ -26,6 +33,8 @@ Pre-requisites:
 
 ```sudo apt install librust-openssl-dev```
 
+
+### Setup full nodes & configure seeds, peers and endpoints
 
 To successfully relay IBC packets you need to run private full nodes (custom pruning or archive node) on all networks you want to support. Since relaying-success highly depends on latency and disk-IO-rate it is currently recommended to service these full/archive nodes on the same machine as the relayer process. 
 
@@ -137,14 +146,12 @@ Environment=BITSONGD_LOG_LEVEL=info
 WantedBy=multi-user.target
 ```
 
+
 ### Build & setup Hermes
-
-
-```mkdir -p $HOME/.hermes/bin```
 
 Make the directory where you'll place the binary, clone the hermes source repository and build it using the latest release. Copy to ~/.cargo/bin & /usr/bin (or preferred directory for systemd execution)
 ```
-mkdir -p $HOME/hermes/bin
+mkdir -p $HOME/hermes
 git clone https://github.com/informalsystems/ibc-rs.git hermes
 cd hermes
 git checkout v0.8.0
@@ -321,3 +328,66 @@ list = [
    ['transfer', 'channel-229']
  ]
 ```
+
+Add your relaying-wallets to hermes' keyring (located in $HOME/.hermes/keys)
+
+Best practice is to use the same mnemonic over all networks, do not use your relaying-addresses for anything else because it might lead to mismatched account sequence errors.
+```hermes keys restore bitsong-2b -m "24-word mnemonic seed"```
+```hermes keys restore osmosis-1 -m "24-word mnemonic seed"```
+```hermes keys restore cosmoshub-4 -m "24-word mnemonic seed"```
+
+You can validate your hermes configuration file:
+```
+hermes config validate
+INFO ThreadId(01) using default configuration from '/home/relay/.hermes/config.toml'
+Success: "validation passed successfully"
+```
+
+Refresh service files, enable hermes on system-startup, enable all node-daemons on system-startup, start node-daemons, sync, start hermes.
+
+*Tipp: use chainlayer quicksync to bootstrap your nodes faster: https://quicksync.io/networks/osmosis.html*
+
+```sudo systemctl daemon-reload```
+```sudo systemctl enable hermes.service```
+```sudo systemctl enable bitsongd.service```
+```sudo systemctl enable osmosisd.service```
+```sudo systemctl enable gaiad.service```
+
+```sudo systemctl start bitsongd```
+```sudo systemctl start osmosisd```
+```sudo systemctl start gaiad```
+
+Watch node-daemon output to check if your nodes are syncing:
+```journaltctl -u bitsongd -f```
+
+When your nodes are fully synced you can start the hermes daemon:
+```sudo systemctl start hermes && journalctl -u hermes -f```
+
+Hermes does a chain-health-check at startup. Watch the output to check if all connected nodes are up and synced
+```
+INFO ThreadId(01) Hermes has started
+INFO ThreadId(01) [osmosis-1] chain is healthy
+INFO ThreadId(01) [cosmoshub-4] chain is healthy
+INFO ThreadId(01) [bitsong-2b] chain is healthy
+```
+
+Be patient, starting all the clients & workers will take a few minutes. Watch hermes' output for successfully relayed packets or any errors.
+
+It will try & clear any unreceived packets after startup has completed.
+
+
+### Snippets
+
+Query Hermes for unreceived packets & acknowledgements (check if channels are "clear")
+```hermes query packet unreceived-packets bitsong-2b transfer channel-0```
+```hermes query packet unreceived-acks bitsong-2b transfer channel-0```
+
+```hermes query packet unreceived-packets osmosis-1 transfer channel-73```
+```hermes query packet unreceived-acks bitsong-1 transfer channel-73```
+
+Query Hermes for packet commitments:
+```hermes query packet commitments osmosis-1 transfer channel-0```
+
+Clear unreceived packets manually. *Experimental: you'll need to stop your hermes daemon for it not to get confused with account sequences.*
+```hermes tx raw packet-recv osmosis-1 bitsong-2b transfer channel-0```
+```hermes tx raw packet-recv bitsong-2b osmosis-1 transfer channel-73```
