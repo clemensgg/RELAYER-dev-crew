@@ -400,7 +400,8 @@ hermes query packet unreceived-acks bitsong-1 transfer channel-73
 
 Query Hermes for packet commitments:
 ```
-hermes query packet commitments osmosis-1 transfer channel-0
+hermes query packet commitments osmosis-1 transfer channel-73
+hermes query packet commitments bitsong-2b transfer channel-73
 ```
 
 Clear unreceived packets manually. *Experimental: you'll need to stop your hermes daemon for it not to get confused with account sequences.*
