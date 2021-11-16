@@ -31,7 +31,7 @@ Pre-requisites:
 - openssl for rust. The OpenSSL library with its headers is required. Refer to https://docs.rs/openssl/0.10.38/openssl/
 
 ```
-sudo apt install librust-openssl-dev
+sudo apt install librust-openssl-dev build-essential git
 ```
 
 
