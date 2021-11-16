@@ -332,9 +332,11 @@ list = [
 Add your relaying-wallets to hermes' keyring (located in $HOME/.hermes/keys)
 
 Best practice is to use the same mnemonic over all networks, do not use your relaying-addresses for anything else because it might lead to mismatched account sequence errors.
-```hermes keys restore bitsong-2b -m "24-word mnemonic seed"```
-```hermes keys restore osmosis-1 -m "24-word mnemonic seed"```
-```hermes keys restore cosmoshub-4 -m "24-word mnemonic seed"```
+```
+hermes keys restore bitsong-2b -m "24-word mnemonic seed"
+hermes keys restore osmosis-1 -m "24-word mnemonic seed"
+hermes keys restore cosmoshub-4 -m "24-word mnemonic seed"
+```
 
 You can validate your hermes configuration file:
 ```
@@ -346,16 +348,19 @@ Success: "validation passed successfully"
 Refresh service files, enable hermes on system-startup, enable all node-daemons on system-startup, start node-daemons, sync, start hermes.
 
 *Tipp: use chainlayer quicksync to bootstrap your nodes faster: https://quicksync.io/networks/osmosis.html*
+```
+sudo systemctl daemon-reload
+sudo systemctl enable hermes.service
+sudo systemctl enable bitsongd.service
+sudo systemctl enable osmosisd.service
+sudo systemctl enable gaiad.service
+```
 
-```sudo systemctl daemon-reload```
-```sudo systemctl enable hermes.service```
-```sudo systemctl enable bitsongd.service```
-```sudo systemctl enable osmosisd.service```
-```sudo systemctl enable gaiad.service```
-
-```sudo systemctl start bitsongd```
-```sudo systemctl start osmosisd```
-```sudo systemctl start gaiad```
+```
+sudo systemctl start bitsongd
+sudo systemctl start osmosisd
+sudo systemctl start gaiad
+```
 
 Watch node-daemon output to check if your nodes are syncing:
 ```journaltctl -u bitsongd -f```
