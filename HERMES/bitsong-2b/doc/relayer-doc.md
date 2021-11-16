@@ -31,7 +31,9 @@ Pre-requisites:
 - build-essential, git
 - openssl for rust. The OpenSSL library with its headers is required. Refer to https://docs.rs/openssl/0.10.38/openssl/
 
-```sudo apt install librust-openssl-dev```
+```
+sudo apt install librust-openssl-dev
+```
 
 
 ### Setup full nodes & configure seeds, peers and endpoints
@@ -363,10 +365,14 @@ sudo systemctl start gaiad
 ```
 
 Watch node-daemon output to check if your nodes are syncing:
-```journaltctl -u bitsongd -f```
+```
+journaltctl -u bitsongd -f
+```
 
 When your nodes are fully synced you can start the hermes daemon:
-```sudo systemctl start hermes && journalctl -u hermes -f```
+```
+sudo systemctl start hermes && journalctl -u hermes -f
+```
 
 Hermes does a chain-health-check at startup. Watch the output to check if all connected nodes are up and synced
 ```
