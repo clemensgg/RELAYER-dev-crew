@@ -1,6 +1,3 @@
-This section contains instructions on how to setup the rust relayer "hermes" and relay IBC packets between Terra and other IBC-enabled networks.
-
-
 # official Terra IBC Channels
 
 | source chain-id  | source channel  | source denom | destination chain-id  | destinaion channel | IBC token-address on destinaion chain |
