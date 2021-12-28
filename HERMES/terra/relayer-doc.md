@@ -339,7 +339,6 @@ list = [
    ['transfer', 'channel-219'] #terra
  ]
 
-
 [[chains]]
 id = 'secret-4'
 rpc_addr = 'http://127.0.0.1:7031'
