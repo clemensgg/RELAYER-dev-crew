@@ -127,8 +127,6 @@ Description=Bitsong Daemon
 
 [Service]
 User=relay
-Environment="DAEMON_HOME=/home/relay/.bitsongd"
-Environment="DAEMON_NAME=bitsongd"
 Environment=BITSONGD_P2P_LADDR=tcp://0.0.0.0:7010
 Environment=BITSONGD_RPC_LADDR=tcp://0.0.0.0:7011
 Environment=BITSONGD_GRPC_ADDRESS=127.0.0.1:7012
@@ -155,8 +153,8 @@ Make the directory where you'll place the binary, clone the hermes source reposi
 mkdir -p $HOME/hermes
 git clone https://github.com/informalsystems/ibc-rs.git hermes
 cd hermes
-git checkout v0.8.0
-cargo install ibc-relayer-cli --bin hermes --locked
+git checkout v0.11.0
+cargo install ibc-relayer-cli --bin hermes
 cp target/release/hermes $HOME/.cargo/bin
 sudo cp target/release/hermes /usr/bin
 ```
@@ -172,7 +170,7 @@ Check hermes version & config dir setup
 ```
 hermes version
 INFO ThreadId(01) using default configuration from '/home/relay/.hermes/config.toml'
-hermes 0.8.0
+hermes 0.11.0
 ```
 
 Edit hermes config (use ports according to your port config, set filter=true to filter channels you don't relay)
@@ -195,7 +193,7 @@ strategy = 'packets'
 #   is parametrized with (numerator = 1, denominator = 3), so that clients with
 #   thresholds different than this will be ignored.
 # If set to 'true', both of the above filters will be enabled.
-filter = true
+#filter = true # breaking in v0.11.0 where filter = true by default
 
 # Specify the verbosity for the relayer logging output. Default: 'info'
 # Valid options are 'error', 'warn', 'info', 'debug', 'trace'.
