@@ -25,9 +25,9 @@ Hardware specs:
 
 ## Hermes (rust) https://hermes.informal.systems/
 
-Note: in order to successfully relay during the launch-phase of Omniflix your Omniflix account needs to receive a `feegrant` by the team to pay transaction fees.
+Note: in order to successfully relay during the launch-phase of Omniflix your relayer address (omniflix address) needs to receive a `feegrant` by the team to pay transaction fees.
 
-Please use the google sheet (relayer coordination sheet provided on discord) to get your address whitelisted and receive the `granter` address that must be pasted to `config.toml`
+Please use the google sheet (relayer coordination sheet provided on discord) to get your relayer address whitelisted and receive the `granter` address that must be pasted to `config.toml`
 
 Pre-requisites: 
 
