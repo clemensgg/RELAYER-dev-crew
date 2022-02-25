@@ -35,7 +35,7 @@ Pre-requisites:
 - build-essential, git
 - openssl for rust. The OpenSSL library with its headers is required. Refer to https://docs.rs/openssl/0.10.38/openssl/
 
-```
+```sh
 sudo apt install librust-openssl-dev build-essential git
 ```
 
@@ -48,7 +48,7 @@ Because the relaying process needs to be able to query the chain back in height 
 
 *edit app.toml - note: at an average block time of 6.5sec pruning-keep-recent=400000 will result in a retained chainstate of ~30d. This will suffice for most cosmos-sdk chains with an unstaking period < 30d*
 
-```
+```toml
 pruning=custom 
 pruning-keep-recent=400000 
 pruning-keep-every=0 
@@ -60,7 +60,7 @@ hermes needs to be able to query the API- and gRPC-endpoints of your nodes, you 
 *edit app.toml & config.toml, choose a unique port-config for each chain, write down your port-config*
 
 *app.toml*
-```
+```toml
 [api]
 
 # Enable defines if the API server should be enabled.
@@ -72,7 +72,7 @@ swagger = false
 # Address defines the API server to listen on.
 address = "tcp://0.0.0.0:7001"
 ```
-```
+```toml
 [grpc]
 
 # Enable defines if the gRPC server should be enabled.
@@ -83,17 +83,17 @@ address = "0.0.0.0:7002"
 ```
 
 *config.toml - choose unique pprof_laddr port*
-```
+```toml
 # pprof listen address (https://golang.org/pkg/net/http/pprof)
 pprof_laddr = "localhost:7009"
 ```
-```
+```toml
 [rpc]
 
 # TCP or UNIX socket address for the RPC server to listen on
 laddr = "tcp://127.0.0.1:7003"
 ```
-```
+```toml
 [p2p]
 
 # Address to listen for incoming connections
@@ -103,23 +103,23 @@ laddr = "tcp://0.0.0.0:7000"
 *config.toml - set persistent-peers & seeds for each chain*
 
 osmosis-1 seeds:
-```
+```toml
 "83adaa38d1c15450056050fd4c9763fcc7e02e2c@ec2-44-234-84-104.us-west-2.compute.amazonaws.com:26656,23142ab5d94ad7fa3433a889dcd3c6bb6d5f247d@95.217.193.163:26656,f82d1a360dc92d4e74fdc2c8e32f4239e59aebdf@95.217.121.243:26656,e437756a853061cc6f1639c2ac997d9f7e84be67@144.76.183.180:26656,f515a8599b40f0e84dfad935ba414674ab11a668@osmosis.blockpane.com:26656"
 ```
 osmosis-1 persistent-peers: 
-```
+```toml
 "147d0fe101bbd9e200ccbe3d353d5e7762cb02ee@207.154.201.8:26656, 9f77af7811da143f339402394ee71e42d5e2fe61@46.101.171.174:26656, d518832e4ded0484183fef3509d9f23ebb70b528@46.101.202.54:26656, 8f67a2fcdd7ade970b1983bf1697111d35dfdd6f@52.79.199.137:26656, 00c328a33578466c711874ec5ee7ada75951f99a@35.82.201.64:26656, cfb6f2d686014135d4a6034aa6645abd0020cac6@52.79.88.57:26656, 8d9967d5f865c68f6fe2630c0f725b0363554e77@134.255.252.173:26656, 785bc83577e3980545bac051de8f57a9fd82695f@194.233.164.146:26656, 778fdedf6effe996f039f22901a3360bc838b52e@161.97.187.189:36657, 64d36f3a186a113c02db0cf7c588c7c85d946b5b@209.97.132.170:26656, 4d9ac3510d9f5cfc975a28eb2a7b8da866f7bc47@37.187.38.191:26656, 2115945f074ddb038de5d835e287fa03e32f0628@95.217.43.85:26656"
 ```
 cosmoshub-4 seeds: 
-```
+```toml
 "bf8328b66dceb4987e5cd94430af66045e59899f@public-seed.cosmos.vitwit.com:26656,cfd785a4224c7940e9a10f6c1ab24c343e923bec@164.68.107.188:26656,d72b3011ed46d783e369fdf8ae2055b99a1e5074@173.249.50.25:26656,ba3bacc714817218562f743178228f23678b2873@public-seed-node.cosmoshub.certus.one:26656,3c7cad4154967a294b3ba1cc752e40e8779640ad@84.201.128.115:26656"
 ```
 cosmoshub-4 persistent-peers: 
-```
+```toml
 "ee27245d88c632a556cf72cc7f3587380c09b469@45.79.249.253:26656,538ebe0086f0f5e9ca922dae0462cc87e22f0a50@34.122.34.67:26656,d3209b9f88eec64f10555a11ecbf797bb0fa29f4@34.125.169.233:26656,bdc2c3d410ca7731411b7e46a252012323fbbf37@34.83.209.166:26656,585794737e6b318957088e645e17c0669f3b11fc@54.160.123.34:26656,11dfe200894f38e411beca77928e9dd118e66813@94.130.98.157:26656"
 ```
 secret-4 persistent-peers: 
-```
+```toml
 "971911193b09a17c347565d311a3cc4f6004156d@peer.node.scrtlabs.com:26656, 7649dcfda0eb77b38fde8e817da8071faea3cd13@bootstrap.scrt.network:26656"
 ```
 
@@ -129,7 +129,7 @@ To simplify the config process you can set Environment-Variables in the systemd 
 
 ```sudo vim /etc/systemd/system/terrad.service```
 
-```
+```service
 [Unit]
 Description=Terra Daemon
 
@@ -157,32 +157,32 @@ WantedBy=multi-user.target
 ### Build & setup Hermes
 
 Make the directory where you'll place the binary, clone the hermes source repository and build it using the latest release. Copy to ~/.cargo/bin & /usr/bin (or preferred directory for systemd execution)
-```
+```sh
 mkdir -p $HOME/hermes
 git clone https://github.com/informalsystems/ibc-rs.git hermes
 cd hermes
-git checkout v0.9.0
+git checkout v0.12.0
 cargo install ibc-relayer-cli --bin hermes --locked
 cp target/release/hermes $HOME/.cargo/bin
 sudo cp target/release/hermes /usr/local/bin
 ```
 
 Make hermes config & keys directory, copy config-template to config directory:
-```
+```sh
 mkdir -p $HOME/.hermes
 mkdir -p $HOME/.hermes/keys
 cp config.toml $HOME/.hermes
 ```
 
 Check hermes version & config dir setup
-```
+```sh
 hermes version
 INFO ThreadId(01) using default configuration from '/home/relay/.hermes/config.toml'
 hermes 0.9.0
 ```
 
 Edit hermes config (use ports according to your port config, set filter=true to filter channels you don't relay)
-```
+```toml
 # The global section has parameters that apply globally to the relayer operation.
 [global]
 
@@ -191,17 +191,6 @@ Edit hermes config (use ports according to your port config, set filter=true to 
 #   - 'all': Relay packets and perform channel and connection handshakes.
 #   - 'packets': Relay packets only.
 strategy = 'packets'
-
-# Enable or disable the filtering mechanism. Default: 'false'
-# Valid options are 'true', 'false'.
-# Currently Hermes supports two filters:
-# 1. Packet filtering on a per-chain basis; see the chain-specific
-#   filter specification below in [chains.packet_filter].
-# 2. Filter for all activities based on client state trust threshold; this filter
-#   is parametrized with (numerator = 1, denominator = 3), so that clients with
-#   thresholds different than this will be ignored.
-# If set to 'true', both of the above filters will be enabled.
-filter = true
 
 # Specify the verbosity for the relayer logging output. Default: 'info'
 # Valid options are 'error', 'warn', 'info', 'debug', 'trace'.
@@ -284,9 +273,9 @@ list = [
 
 [[chains]]
 id = 'osmosis-1'
-rpc_addr = 'http://localhost:7011'
-grpc_addr = 'http://localhost:7012'
-websocket_addr = 'ws://localhost:7011/websocket'
+rpc_addr = 'http://127.0.0.1:7011'
+grpc_addr = 'http://127.0.0.1:7012'
+websocket_addr = 'ws://127.0.0.1:7011/websocket'
 rpc_timeout = '10s'
 account_prefix = 'osmo'
 key_name = 'osmosis'
@@ -367,7 +356,7 @@ list = [
 Add your relaying-wallets to hermes' keyring (located in $HOME/.hermes/keys)
 
 Best practice is to use the same mnemonic over all networks, do not use your relaying-addresses for anything else because it will lead to account sequence errors.
-```
+```sh
 hermes keys restore columbus-5 -m "24-word mnemonic seed"
 hermes keys restore osmosis-1 -m "24-word mnemonic seed"
 hermes keys restore cosmoshub-4 -m "24-word mnemonic seed"
@@ -375,7 +364,7 @@ hermes keys restore secret-4 -m "24-word mnemonic seed"
 ```
 
 You can validate your hermes configuration file:
-```
+```sh
 hermes config validate
 INFO ThreadId(01) using default configuration from '/home/relay/.hermes/config.toml'
 Success: "validation passed successfully"
@@ -384,7 +373,7 @@ Success: "validation passed successfully"
 Refresh service files, enable hermes on system-startup, enable all node-daemons on system-startup, start node-daemons, sync, start hermes.
 
 *Tipp: use chainlayer quicksync to bootstrap your nodes faster: https://quicksync.io/networks/osmosis.html*
-```
+```sh
 sudo systemctl daemon-reload
 sudo systemctl enable hermes.service
 sudo systemctl enable terrad.service
@@ -393,7 +382,7 @@ sudo systemctl enable gaiad.service
 sudo systemctl enable secretd.service
 ```
 
-```
+```sh
 sudo systemctl start terrad
 sudo systemctl start osmosisd
 sudo systemctl start gaiad
@@ -401,17 +390,17 @@ sudo systemctl start secretd
 ```
 
 Watch node-daemon output to check if your nodes are syncing:
-```
+```sh
 journaltctl -u terrad -f
 ```
 
 When your nodes are fully synced you can start the hermes daemon:
-```
+```sh
 sudo systemctl start hermes && journalctl -u hermes -f
 ```
 
 Hermes does a chain-health-check at startup. Watch the output to check if all connected nodes are up and synced
-```
+```sh
 INFO ThreadId(01) Hermes has started
 INFO ThreadId(01) [columbus-5] chain is healthy
 INFO ThreadId(01) [osmosis-1] chain is healthy
@@ -427,23 +416,29 @@ It will try & clear any unreceived packets after startup has completed.
 ### Snippets
 
 Query Hermes for unreceived packets & acknowledgements (check if channels are "clear")
-```
+```sh
 hermes query packet unreceived-packets columbus-5 transfer channel-1
 hermes query packet unreceived-acks columbus-5 transfer channel-1
 ```
-```
+```sh
 hermes query packet unreceived-packets osmosis-1 transfer channel-72
 hermes query packet unreceived-acks osmosis-1 transfer channel-72
 ```
 
 Query Hermes for packet commitments:
-```
+```sh
 hermes query packet commitments columbus-5 transfer channel-1
 hermes query packet commitments osmosis-1 transfer channel-72
 ```
 
-Clear unreceived packets manually. *Experimental: you'll need to stop your hermes daemon for it not to get confused with account sequences.*
+Clear channel (only works on hermes `v0.12.0` and higher)
+```sh
+hermes clear packets columbus-5 transfer channel-1
+hermes clear packets osmosis-1 transfer channel-72
 ```
+
+Clear unreceived packets manually. *Experimental: you'll need to stop your hermes daemon for it not to get confused with account sequences.*
+```sh
 hermes tx raw packet-recv osmosis-1 columbus-5 transfer channel-1
 hermes tx raw packet-ack osmosis-1 columbus-5 transfer channel-1
 hermes tx raw packet-recv columbus-5 osmosis-1 transfer channel-72
