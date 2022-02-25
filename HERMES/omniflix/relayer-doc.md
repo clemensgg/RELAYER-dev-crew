@@ -1,4 +1,4 @@
-# official Omniflix IBC Channels
+## official Omniflix IBC Channels
 
 | source chain-id  | source channel  | destination chain-id  | destinaion channel |
 | ---------------- | --------------- | --------------------- | ------------------ |
@@ -15,7 +15,7 @@
 | omniflixhub-1 | channel-10 | sentinelhub-2 | channel-53 |
 
 
-# Relayer Tutorial for hermes relayer (rust) https://hermes.informal.systems/
+## Relayer Tutorial for hermes relayer (rust) https://hermes.informal.systems/
 
 Hardware specs:
 
