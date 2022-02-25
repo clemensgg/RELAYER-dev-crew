@@ -14,6 +14,7 @@
 | omniflixhub-1 | channel-9 | kichain-2 | channel-10 |
 | omniflixhub-1 | channel-10 | sentinelhub-2 | channel-53 |
 
+---
 
 ## Relayer Tutorial for hermes relayer (rust) https://hermes.informal.systems/
 
@@ -22,8 +23,6 @@ Hardware specs:
 - 16+ vCPUs or Intel or AMD 16 core CPU
 - at least 64GB RAM
 - 3TB+ nVME drives
-
----
 
 Note: in order to successfully relay during the launch-phase of Omniflix your relayer address (omniflix address) needs to receive a `feegrant` by the team to pay transaction fees.
 
