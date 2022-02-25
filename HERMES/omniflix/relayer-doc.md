@@ -64,18 +64,6 @@ hermes needs to be able to query the RPC- and gRPC-endpoints of your nodes, you 
 
 *app.toml*
 ```toml
-[api]
-
-# Enable defines if the API server should be enabled.
-enable = true
-
-# Swagger defines if swagger documentation should automatically be registered.
-swagger = false
-
-# Address defines the API server to listen on.
-address = "tcp://0.0.0.0:7001"
-```
-```toml
 [grpc]
 
 # Enable defines if the gRPC server should be enabled.
