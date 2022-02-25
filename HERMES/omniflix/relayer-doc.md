@@ -49,6 +49,8 @@ To successfully relay IBC packets you need to run private full nodes (custom pru
 
 Setup 1 dedicated RPC & gRPC endpoint per chain:
 
+*Tipp: use [statesync](https://blog.cosmos.network/cosmos-sdk-state-sync-guide-99e4cf43be2f) or [chainlayer quicksync](https://quicksync.io/networks/osmosis.html) to bootstrap your nodes faster*
+
 *edit app.toml - note: at an average block time of 6.5sec pruning-keep-recent=400000 will result in a retained chainstate of ~30d. This will suffice for most cosmos-sdk chains with an unstaking period < 30d*
 
 ```toml
@@ -384,7 +386,6 @@ WantedBy=multi-user.target
 
 Refresh service files, enable hermes on system-startup, enable all node-daemons on system-startup, start node-daemons, sync, start hermes.
 
-*Tipp: use [statesync](https://blog.cosmos.network/cosmos-sdk-state-sync-guide-99e4cf43be2f) or [chainlayer quicksync](https://quicksync.io/networks/osmosis.html) to bootstrap your nodes faster*
 ```sh
 sudo systemctl daemon-reload
 sudo systemctl enable hermes.service
