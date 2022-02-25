@@ -47,7 +47,9 @@ sudo apt install librust-openssl-dev build-essential git
 
 To successfully relay IBC packets you need to run private full nodes (custom pruning or archive node) on all networks you want to support. Since relaying-success highly depends on latency and disk-IO-rate it is currently recommended to service these full/archive nodes on the same machine as the relayer process. 
 
-Setup 1 dedicated RPC & gRPC endpoint per chain (Tipp: use [statesync](https://blog.cosmos.network/cosmos-sdk-state-sync-guide-99e4cf43be2f) or [chainlayer quicksync](https://quicksync.io/networks/osmosis.html) to bootstrap your nodes faster)
+Setup 1 dedicated RPC & gRPC endpoint per chain: 
+
+(Tipp: use [statesync](https://blog.cosmos.network/cosmos-sdk-state-sync-guide-99e4cf43be2f) or [chainlayer quicksync](https://quicksync.io/networks/osmosis.html) to bootstrap your nodes faster)
 
 *edit app.toml - note: at an average block time of 6.5sec pruning-keep-recent=400000 will result in a retained chainstate of ~30d. This will suffice for most cosmos-sdk chains with an unstaking period < 30d*
 
