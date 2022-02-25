@@ -384,7 +384,7 @@ WantedBy=multi-user.target
 
 Refresh service files, enable hermes on system-startup, enable all node-daemons on system-startup, start node-daemons, sync, start hermes.
 
-*Tipp: use chainlayer quicksync to bootstrap your nodes faster: https://quicksync.io/networks/osmosis.html*
+*Tipp: use [statesync](https://blog.cosmos.network/cosmos-sdk-state-sync-guide-99e4cf43be2f) or [chainlayer quicksync](https://quicksync.io/networks/osmosis.html) to bootstrap your nodes faster*
 ```sh
 sudo systemctl daemon-reload
 sudo systemctl enable hermes.service
