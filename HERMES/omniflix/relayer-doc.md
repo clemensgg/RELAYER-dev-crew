@@ -44,7 +44,7 @@ Pre-requisites:
 sudo apt install librust-openssl-dev build-essential git
 ```
 
-### Setup full nodes & configure seeds, peers and endpoints
+## Setup full nodes & configure seeds, peers and endpoints
 
 To successfully relay IBC packets you need to run private full nodes (custom pruning or archive node) on all networks you want to support. Since relaying-success highly depends on latency and disk-IO-rate it is currently recommended to service these full/archive nodes on the same machine as the relayer process. 
 
@@ -150,7 +150,7 @@ WantedBy=multi-user.target
 ```
 
 
-### Build & setup Hermes
+## Build & setup Hermes
 
 Make the directory where you'll place the binary, clone the hermes source repository and build it using the latest release. Copy to ~/.cargo/bin & /usr/bin (or preferred directory for systemd execution)
 ```sh
@@ -442,7 +442,7 @@ Watch hermes' output for successfully relayed packets or any errors.
 It will try & clear any unreceived packets after startup has completed.
 
 
-### Snippets
+## Snippets
 
 Query Hermes for unreceived packets & acknowledgements (check if channels are "clear")
 ```sh
