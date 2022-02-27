@@ -1,4 +1,4 @@
-## official Omniflix IBC Channels
+## Official IBC Channels for the OmniFlix Hub
 
 | source chain-id  | source channel  | destination chain-id  | destinaion channel |
 | ---------------- | --------------- | --------------------- | ------------------ |
@@ -16,7 +16,7 @@
 
 ---
 
-## Relayer Tutorial for hermes relayer (rust) https://hermes.informal.systems/
+## Relayer Tutorial for Hermes relayer (rust) https://hermes.informal.systems/
 
 Hardware specs:
 
@@ -24,22 +24,20 @@ Hardware specs:
 - at least 64GB RAM
 - 3TB+ nVME drives
 
-Note: in order to successfully relay during the launch-phase of Omniflix your relayer address (omniflix address) needs to receive a `feegrant` by the team to pay transaction fees.
+Note: In order to successfully relay during the launch-phase of OmniFlix your relayer address (omniflix address) needs to receive a `feegrant` by the team to pay transaction fees.
 
-Please use the google sheet (relayer coordination sheet provided on discord) to get your relayer address whitelisted and receive the `granter` address that must be pasted to `config.toml`
+Please use the Google Sheet (Relayer Coordination sheet provided on the OmniFlix Discord server) to get your relayer address whitelisted and receive the `granter` address that must be pasted to `config.toml`
 
-Pre-requisites: 
+Pre-requisites:
 
 - latest go-version https://golang.org/doc/install
 - Fresh Rust installation: For instructions on how to install Rust on your machine please follow the official Notes about Rust installation at https://www.rust-lang.org/tools/install
 - build-essential, git
 - openssl for rust. The OpenSSL library with its headers is required. Refer to https://docs.rs/openssl/0.10.38/openssl/
-- relayer account (omniflix address) filled out on the relayer coordination sheet provided by the Omniflix team
-- received `granter` address from the team
+- relayer account (omniflix address) filled out on the relayer coordination sheet provided by the OmniFlix team
+- received `granter` address from the team. Double check if it is the same - `omniflix1p3736gw3mll4m5k5r80w3jvc9lynvz4t5zkvrw`
 
-
-
-```sh
+```
 sudo apt install librust-openssl-dev build-essential git
 ```
 
@@ -47,7 +45,7 @@ sudo apt install librust-openssl-dev build-essential git
 
 To successfully relay IBC packets you need to run private full nodes (custom pruning or archive node) on all networks you want to support. Since relaying-success highly depends on latency and disk-IO-rate it is currently recommended to service these full/archive nodes on the same machine as the relayer process. 
 
-Setup 1 dedicated RPC & gRPC endpoint per chain: 
+Setup 1 - Dedicated RPC & gRPC endpoint per chain: 
 
 (Tipp: use [statesync](https://blog.cosmos.network/cosmos-sdk-state-sync-guide-99e4cf43be2f) or [chainlayer quicksync](https://quicksync.io/networks/osmosis.html) to bootstrap your nodes faster)
 
@@ -347,9 +345,10 @@ list = [
 
 ```
 
-Add your relayer-wallets to hermes' keyring (located in $HOME/.hermes/keys)
+Add your relayer-wallets to Hermes' keyring (located in $HOME/.hermes/keys)
 
-Best practice is to use the same mnemonic over all networks, do not use your relaying-addresses for anything else because it will lead to account sequence errors.
+Best practice is to use the same mnemonic over all networks, do not use your relaying-addresses for anything else because it will lead to account sequence errors. If you do not use the same mnemonic, double check and let the team know in case of any further issues. 
+
 ```sh
 hermes keys restore omniflixhub-1 -m "24-word mnemonic seed"
 hermes keys restore cosmoshub-4 -m "24-word mnemonic seed"
@@ -402,7 +401,7 @@ sudo systemctl start osmosisd
 sudo systemctl start terrad
 ```
 
-Watch node-daemon output to check if your nodes are syncing:
+Watch the node-daemon output to check if your nodes are syncing:
 ```sh
 journaltctl -u omniflixhubd -f
 ```
