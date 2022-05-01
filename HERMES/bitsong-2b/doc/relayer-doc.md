@@ -176,7 +176,7 @@ cp config.toml $HOME/.hermes
 Check hermes version & config dir setup
 ```sh
 hermes version
-hermes 0.13.0
+hermes 0.14.0
 ```
 
 Edit hermes config (use ports according to your port config, set filter=true to filter channels you don't relay)
@@ -431,5 +431,3 @@ Clear unreceived packets manually. _Experimental: you'll need to stop your herme
 hermes tx raw packet-recv osmosis-1 bitsong-2b transfer channel-0
 hermes tx raw packet-recv bitsong-2b osmosis-1 transfer channel-73
 ```
-
-**Thanks to** [**@ccclaimens**](https://twitter.com/ccclaimens) **from** [**@crypto\_crew**](https://twitter.com/crypto\_crew)****
