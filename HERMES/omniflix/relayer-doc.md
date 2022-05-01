@@ -1,58 +1,59 @@
 ## Official IBC Channels for the OmniFlix Hub
 
-| source chain-id  | source channel  | destination chain-id  | destinaion channel |
-| ---------------- | --------------- | --------------------- | ------------------ |
-| omniflixhub-1 | channel-0 | cosmoshub-4 | channel-290 |
-| omniflixhub-1 | channel-1 | osmosis-1 | channel-199 |
-| omniflixhub-1 | channel-2 | juno-1 | channel-63 |
-| omniflixhub-1 | channel-3 | gravity-bridge-3 | channel-35 |
-| omniflixhub-1 | channel-4 | columbus-5 | channel-27 |
-| omniflixhub-1 | channel-5 | chihuahua-1 | channel-17 |
-| omniflixhub-1 | channel-6 | sifchain-1 | channel-44 |
-| omniflixhub-1 | channel-7 | akashnet-2 | channel-39 |
-| omniflixhub-1 | channel-8 | stargaze-1 | channel-36 |
-| omniflixhub-1 | channel-9 | kichain-2 | channel-10 |
-| omniflixhub-1 | channel-10 | sentinelhub-2 | channel-53 |
+Below is a list of IBC channels setup for the OmniFlix Hub.
+
+| source chain-id  | source channel  | destination chain | destination chain-id  | destination channel | comments |
+| ---------------- | --------------- | --------------------- | ------------------ | ------------------ | --------------------- |
+| omniflixhub-1 | channel-1 | Osmosis | osmosis-1 | channel-199 | No change |
+| omniflixhub-1 | channel-4 | Terra | columbus-5 | channel-27 | No change |
+| omniflixhub-1 | channel-5 | Chihuahua| chihuahua-1 | channel-17 | No change |
+| omniflixhub-1 | channel-8 |  Stargaze | stargaze-1 | channel-36 | No change |
+| omniflixhub-1 | channel-12 |  Cosmos Hub | cosmoshub-4 | channel-306 | Updated from `ch-0` on OmniFlix and `ch-290` on the Cosmos Hub |
+| omniflixhub-1 | channel-14 | Gravity Bridge | gravity-bridge-3 | channel-51 | Updated from `ch-3` on OmniFlix and `ch-35` on the Gravity Bridge |
+| omniflixhub-1 | channel-15 | Sifchain | sifchain-1 | channel-49 | Updated from `ch-6` on OmniFlix and `ch-44` on the Sifchain |
+| omniflixhub-1 | channel-16 |  Akash Net | akashnet-2 | channel-42 | Updated from `ch-7` on OmniFlix and `ch-39` on the Akash Network |
+| omniflixhub-1 | channel-17 |  Ki Chain | kichain-2 | channel-13 | Updated from `ch-9` on OmniFlix and `ch-10` on the Ki Chain |
+| omniflixhub-1 | channel-18 |  Sentinel Hub | sentinelhub-2 | channel-54 | Updated from `ch-10` on OmniFlix and `ch-53` on the Sentinel Hub |
+| omniflixhub-1 | channel-19 |  Crypto.org / Cronos | crypto-org-chain-mainnet-1 | channel-55 | Updated from `ch-11` on OmniFlix and `ch-54` on the the Crypto.com chain |
+| omniflixhub-1 | channel-20 | Juno Network | juno-1 | channel-78 | Updated from `ch-13` on OmniFlix and `ch-74` on the Juno Network. Before these, the channels were `ch-2` on OmniFlix and `ch-63` on the Juno Network |
 
 ---
 
-## Relayer Tutorial for Hermes relayer (rust) https://hermes.informal.systems/
+## Relayer Tutorial
 
 Hardware specs:
 
-- 16+ vCPUs or Intel or AMD 16 core CPU
-- at least 64GB RAM
-- 3TB+ nVME drives
+* 16+ vCPUs or Intel or AMD 16 core CPU
+* at least 64GB RAM
+* 4TB+ nVME drives
 
-Note: In order to successfully relay during the launch-phase of OmniFlix your relayer address (omniflix address) needs to receive a `feegrant` by the team to pay transaction fees.
+To assist operators in setting up relayers, Omniflix provides tutorials for the following IBC relayers:
 
-Please use the Google Sheet (Relayer Coordination sheet provided on the OmniFlix Discord server) to get your relayer address whitelisted and receive the `granter` address that must be pasted to `config.toml`
+### Hermes (rust)
+
+[https://hermes.informal.systems/](https://hermes.informal.systems)
 
 Pre-requisites:
 
-- latest go-version https://golang.org/doc/install
-- Fresh Rust installation: For instructions on how to install Rust on your machine please follow the official Notes about Rust installation at https://www.rust-lang.org/tools/install
-- build-essential, git
-- openssl for rust. The OpenSSL library with its headers is required. Refer to https://docs.rs/openssl/0.10.38/openssl/
-- relayer account (omniflix address) filled out on the relayer coordination sheet provided by the OmniFlix team
-- received `granter` address from the team. Double check if it is the same - `omniflix1p3736gw3mll4m5k5r80w3jvc9lynvz4t5zkvrw`
+* latest go-version [https://golang.org/doc/install](https://golang.org/doc/install)
+* Fresh Rust installation: For instructions on how to install Rust on your machine please follow the official Notes about Rust installation at [https://www.rust-lang.org/tools/install](https://www.rust-lang.org/tools/install)
+* build-essential, git
+* openssl for rust. The OpenSSL library with its headers is required. Refer to [https://docs.rs/openssl/0.10.38/openssl/](https://docs.rs/openssl/0.10.38/openssl/)
 
-```
+_It is recommended to always build binaries on dedicated machine (dev-box), as dev dependencies (rust & go) shouldn't be on your production machine_ 
+```sh
 sudo apt install librust-openssl-dev build-essential git
 ```
 
-## Setup full nodes & configure seeds, peers and endpoints
+#### Setup full nodes & configure seeds, peers and endpoints
 
-To successfully relay IBC packets you need to run private full nodes (custom pruning or archive node) on all networks you want to support. Since relaying-success highly depends on latency and disk-IO-rate it is currently recommended to service these full/archive nodes on the same machine as the relayer process. 
+To successfully relay IBC packets you need to run private full nodes (custom pruning or archive node) on all networks you want to support. Since relaying-success highly depends on latency and disk-IO-rate it is currently recommended to service these full/archive nodes on the same machine as the relayer process.
 
-Setup 1 - Dedicated RPC & gRPC endpoint per chain: 
+Because the relaying process needs to be able to query the chain back in height for at least 2/3 of the unstaking period ("trusting period") it is recommended to use pruning settings that will keep the full chain-state for a longer period of time than the unstaking period:
 
-(Tipp: use [statesync](https://blog.cosmos.network/cosmos-sdk-state-sync-guide-99e4cf43be2f) or [chainlayer quicksync](https://quicksync.io/networks/osmosis.html) to bootstrap your nodes faster)
-
-*edit app.toml - note: at an average block time of 6.5sec pruning-keep-recent=400000 will result in a retained chainstate of ~30d. This will suffice for most cosmos-sdk chains with an unstaking period < 30d*
-
+_edit app.toml - note: at an average block time of 6.5sec pruning-keep-recent=400000 will result in a retained chainstate of \~30d. This will suffice for most cosmos-sdk chains with an unstaking period < 30d_
 ```toml
-pruning="custom" 
+pruning="custom"
 pruning-keep-recent=400000 
 pruning-keep-every=0 
 pruning-interval=100
@@ -60,9 +61,9 @@ pruning-interval=100
 
 hermes needs to be able to query the RPC- and gRPC-endpoints of your nodes, you will need to maintain a well-organized port-setup.
 
-*edit app.toml & config.toml, choose a unique port-config for each chain, write down your port-config*
+_edit app.toml & config.toml, choose a unique port-config for each chain, write down your port-config_
 
-*app.toml*
+_app.toml_
 ```toml
 [grpc]
 
@@ -70,28 +71,28 @@ hermes needs to be able to query the RPC- and gRPC-endpoints of your nodes, you 
 enable = true
 
 # Address defines the gRPC server address to bind to.
-address = "0.0.0.0:7002"
+address = "0.0.0.0:7012"
 ```
 
-*config.toml - choose unique pprof_laddr port*
+_config.toml - choose unique pprof\_laddr port_
 ```toml
 # pprof listen address (https://golang.org/pkg/net/http/pprof)
-pprof_laddr = "localhost:7009"
+pprof_laddr = "localhost:7019"
 ```
 ```toml
 [rpc]
 
 # TCP or UNIX socket address for the RPC server to listen on
-laddr = "tcp://127.0.0.1:7003"
+laddr = "tcp://127.0.0.1:7013"
 ```
 ```toml
 [p2p]
 
 # Address to listen for incoming connections
-laddr = "tcp://0.0.0.0:7000"
+laddr = "tcp://0.0.0.0:7010"
 ```
 
-*config.toml - set seeds (and/or persistent_peers) for each chain*
+_config.toml - set persistent-peers & seeds for each chain_
 
 
 omniflixhub-1 seeds:
@@ -137,18 +138,21 @@ WantedBy=multi-user.target
 ```
 
 
-## Build & setup Hermes
+#### Build & setup Hermes
 
-Make the directory where you'll place the binary, clone the hermes source repository and build it using the latest release. Copy to ~/.cargo/bin & /usr/bin (or preferred directory for systemd execution)
+_Beware that for security reasons this step should be done 'on some remote pc'_
+
+Make the directory where you'll place the source, clone the hermes source repository and build it using the latest release. Optional: copy binary to /usr/bin (or preferred directory for systemd execution)
 ```sh
 mkdir -p $HOME/hermes
 git clone https://github.com/informalsystems/ibc-rs.git hermes
 cd hermes
-git checkout v0.12.0
+git checkout v0.14.0
 cargo install ibc-relayer-cli --bin hermes --locked
-cp target/release/hermes $HOME/.cargo/bin
-sudo cp target/release/hermes /usr/local/bin
+sudo cp ~/.cargo/bin/hermes /usr/bin
 ```
+
+_If you have built your binary on a remote machine, move the binary to your producion environment_
 
 Make hermes config & keys directory, copy config-template to config directory:
 ```sh
@@ -160,8 +164,7 @@ cp config.toml $HOME/.hermes
 Check hermes version & config dir setup
 ```sh
 hermes version
-INFO ThreadId(01) using default configuration from '/home/relay/.hermes/config.toml'
-hermes 0.12.0
+hermes 0.14.0
 ```
 
 Edit hermes config (use ports according to your port config, add only chains you relay)
