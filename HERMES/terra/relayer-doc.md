@@ -16,62 +16,50 @@
 | secret-4 | channel-2 | uscrt | columbus-5 | channel-16 | IBC/EB2CED20AB0466F18BE49285E56B31306D4C60438A022EA995BA65D5E3CF7E09 |
 
 
-# Relayer Tutorial
+## Relayer Tutorial
 
 Hardware specs:
 
-- 16+ vCPUs or Intel or AMD 16 core CPU
-- at least 64GB RAM
-- 4TB+ nVME drives
+* 16+ vCPUs or Intel or AMD 16 core CPU
+* at least 64GB RAM
+* 4TB+ nVME drives
 
-To assist operators in setting up relayers, Terra provides tutorials for the following IBC relayers:
 
-## Hermes (rust) https://hermes.informal.systems/
+### Hermes (rust)
 
-Pre-requisites: 
+[https://hermes.informal.systems/](https://hermes.informal.systems)
 
-- latest go-version https://golang.org/doc/install
-- Fresh Rust installation: For instructions on how to install Rust on your machine please follow the official Notes about Rust installation at https://www.rust-lang.org/tools/install
-- build-essential, git
-- openssl for rust. The OpenSSL library with its headers is required. Refer to https://docs.rs/openssl/0.10.38/openssl/
+Pre-requisites:
 
+* latest go-version [https://golang.org/doc/install](https://golang.org/doc/install)
+* Fresh Rust installation: For instructions on how to install Rust on your machine please follow the official Notes about Rust installation at [https://www.rust-lang.org/tools/install](https://www.rust-lang.org/tools/install)
+* build-essential, git
+* openssl for rust. The OpenSSL library with its headers is required. Refer to [https://docs.rs/openssl/0.10.38/openssl/](https://docs.rs/openssl/0.10.38/openssl/)
+
+_It is recommended to always build binaries on dedicated machine (dev-box), as dev dependencies (rust & go) shouldn't be on your production machine_ 
 ```sh
 sudo apt install librust-openssl-dev build-essential git
 ```
 
+#### Setup full nodes & configure seeds, peers and endpoints
 
-### Setup full nodes & configure seeds, peers and endpoints
-
-To successfully relay IBC packets you need to run private full nodes (custom pruning or archive node) on all networks you want to support. Since relaying-success highly depends on latency and disk-IO-rate it is currently recommended to service these full/archive nodes on the same machine as the relayer process. 
+To successfully relay IBC packets you need to run private full nodes (custom pruning or archive node) on all networks you want to support. Since relaying-success highly depends on latency and disk-IO-rate it is currently recommended to service these full/archive nodes on the same machine as the relayer process.
 
 Because the relaying process needs to be able to query the chain back in height for at least 2/3 of the unstaking period ("trusting period") it is recommended to use pruning settings that will keep the full chain-state for a longer period of time than the unstaking period:
 
-*edit app.toml - note: at an average block time of 6.5sec pruning-keep-recent=400000 will result in a retained chainstate of ~30d. This will suffice for most cosmos-sdk chains with an unstaking period < 30d*
-
+_edit app.toml - note: at an average block time of 6.5sec pruning-keep-recent=400000 will result in a retained chainstate of \~30d. This will suffice for most cosmos-sdk chains with an unstaking period < 30d_
 ```toml
-pruning="custom" 
+pruning="custom"
 pruning-keep-recent=400000 
 pruning-keep-every=0 
 pruning-interval=100
 ```
 
-hermes needs to be able to query the API- and gRPC-endpoints of your nodes, you will need to maintain a well-organized port-setup.
+hermes needs to be able to query the RPC- and gRPC-endpoints of your nodes, you will need to maintain a well-organized port-setup.
 
-*edit app.toml & config.toml, choose a unique port-config for each chain, write down your port-config*
+_edit app.toml & config.toml, choose a unique port-config for each chain, write down your port-config_
 
-*app.toml*
-```toml
-[api]
-
-# Enable defines if the API server should be enabled.
-enable = true
-
-# Swagger defines if swagger documentation should automatically be registered.
-swagger = false
-
-# Address defines the API server to listen on.
-address = "tcp://0.0.0.0:7001"
-```
+_app.toml_
 ```toml
 [grpc]
 
@@ -79,28 +67,28 @@ address = "tcp://0.0.0.0:7001"
 enable = true
 
 # Address defines the gRPC server address to bind to.
-address = "0.0.0.0:7002"
+address = "0.0.0.0:7012"
 ```
 
-*config.toml - choose unique pprof_laddr port*
+_config.toml - choose unique pprof\_laddr port_
 ```toml
 # pprof listen address (https://golang.org/pkg/net/http/pprof)
-pprof_laddr = "localhost:7009"
+pprof_laddr = "localhost:7019"
 ```
 ```toml
 [rpc]
 
 # TCP or UNIX socket address for the RPC server to listen on
-laddr = "tcp://127.0.0.1:7003"
+laddr = "tcp://127.0.0.1:7013"
 ```
 ```toml
 [p2p]
 
 # Address to listen for incoming connections
-laddr = "tcp://0.0.0.0:7000"
+laddr = "tcp://0.0.0.0:7010"
 ```
 
-*config.toml - set persistent-peers & seeds for each chain*
+_config.toml - set persistent-peers & seeds for each chain_
 
 osmosis-1 seeds:
 ```
@@ -154,18 +142,21 @@ WantedBy=multi-user.target
 ```
 
 
-### Build & setup Hermes
+#### Build & setup Hermes
 
-Make the directory where you'll place the binary, clone the hermes source repository and build it using the latest release. Copy to ~/.cargo/bin & /usr/bin (or preferred directory for systemd execution)
+_Beware that for security reasons this step should be done 'on some remote pc'_
+
+Make the directory where you'll place the source, clone the hermes source repository and build it using the latest release. Optional: copy binary to /usr/bin (or preferred directory for systemd execution)
 ```sh
 mkdir -p $HOME/hermes
 git clone https://github.com/informalsystems/ibc-rs.git hermes
 cd hermes
-git checkout v0.12.0
+git checkout v0.14.0
 cargo install ibc-relayer-cli --bin hermes --locked
-cp target/release/hermes $HOME/.cargo/bin
-sudo cp target/release/hermes /usr/local/bin
+sudo cp ~/.cargo/bin/hermes /usr/bin
 ```
+
+_If you have built your binary on a remote machine, move the binary to your producion environment_
 
 Make hermes config & keys directory, copy config-template to config directory:
 ```sh
@@ -177,8 +168,7 @@ cp config.toml $HOME/.hermes
 Check hermes version & config dir setup
 ```sh
 hermes version
-INFO ThreadId(01) using default configuration from '/home/relay/.hermes/config.toml'
-hermes 0.9.0
+hermes 0.14.0
 ```
 
 Edit hermes config (use ports according to your port config, set filter=true to filter channels you don't relay)
